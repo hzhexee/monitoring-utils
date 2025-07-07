@@ -9,20 +9,23 @@
 
 ## Запуск скрипта на VPS:
 
-# Для Grafana
-```
-curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/main/install.sh | bash -s -- --grafana
+```bash
+# Скачиваем репозиторий
+git clone <repository-url>
+cd monitoring-utils
+
+# Запускаем установку
+chmod +x install.sh
+./install.sh
+
+# Запускаем скрипт
+./script.py --grafana    # Для развертывания Grafana стека
+./script.py --kuma       # Для развертывания Uptime-Kuma стека  
+./script.py --node       # Для развертывания Node Exporter на ноде
+./script.py              # Для интерактивного режима
 ```
 
-# Для Uptime-Kuma
-```
-curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/main/install.sh | bash -s -- --kuma
-```
 
-# Для Node Exporter
-```
-curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/main/install.sh | bash -s -- --node
-```
 
 ## Конфигурация Xray-Checker
 
