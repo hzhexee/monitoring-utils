@@ -184,16 +184,8 @@ networks:
     driver: bridge
 EOF
 
-    # Проверка нужна ли подписка
-    echo ""
-    read -p "Хотите добавить подписку для Xray-checker? (y/n): " need_subscription
-    
-    if [[ "$need_subscription" =~ ^[Yy]$ ]]; then
-        # Получение подписки
-        subscription=$(get_subscription)
-    else
-        subscription=""
-    fi
+    # Получение подписки
+    subscription=$(get_subscription)
     
     # Получение дополнительных нод
     additional_nodes=$(get_additional_nodes)
@@ -212,47 +204,39 @@ scrape_configs:
   - job_name: Host-node
     static_configs:
       - targets: ['nodeexp-node:9100']
-${additional_nodes}EOF
+${additional_nodes}
+EOF
 
-    # Замена подписки в docker-compose.yml только если она есть
-    if [[ -n "$subscription" ]]; then
-        sed -i "s|PLACEHOLDER_SUBSCRIPTION|$subscription|g" docker-compose.yml
-        
-        # Обработка файловых подписок
-        if [[ "$subscription" == file://* || "$subscription" == folder://* ]]; then
-            local path=${subscription#*://}
-            if [[ ! -e "$path" ]]; then
-                log_error "Путь $path не существует"
-                exit 1
-            fi
-            
-            # Добавление volume для файлов/папок
-            if [[ "$subscription" == file://* ]]; then
-                sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/config.json:ro" docker-compose.yml
-            else
-                sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/configs:ro" docker-compose.yml
-            fi
+    # Замена подписки в docker-compose.yml
+    sed -i "s|PLACEHOLDER_SUBSCRIPTION|$subscription|g" docker-compose.yml
+    
+    # Обработка файловых подписок
+    if [[ "$subscription" == file://* || "$subscription" == folder://* ]]; then
+        local path=${subscription#*://}
+        if [[ ! -e "$path" ]]; then
+            log_error "Путь $path не существует"
+            exit 1
         fi
-    else
-        # Удаление xray-checker из docker-compose если подписка не нужна
-        sed -i '/xray-checker:/,/^$/d' docker-compose.yml
-        # Удаление xray-checker из prometheus.yml
-        sed -i '/Xray Checker/,/scrape_interval: 1m/d' prometheus.yml
+        
+        # Добавление volume для файлов/папок
+        if [[ "$subscription" == file://* ]]; then
+            sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/config.json:ro" docker-compose.yml
+        else
+            sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/configs:ro" docker-compose.yml
+        fi
     fi
     
     # Запуск контейнеров
     log_info "Запуск контейнеров..."
     docker compose up -d
     
-    log_success "Grafana мониторинг установлен!"
+    log_success "Мониторинг с Grafana установлен!"
     echo ""
     log_info "Доступные сервисы:"
     echo "  - Grafana: http://localhost:3000 (admin/admin)"
     echo "  - Prometheus: http://localhost:9090"
     echo "  - Node Exporter: http://localhost:9100"
-    if [[ -n "$subscription" ]]; then
-        echo "  - Xray Checker: http://localhost:2112"
-    fi
+    echo "  - Xray Checker: http://localhost:2112"
     echo ""
     if [[ -n "$additional_nodes" ]]; then
         log_info "Дополнительные ноды настроены в Prometheus"
@@ -261,7 +245,7 @@ ${additional_nodes}EOF
 }
 
 # Установка Uptime-Kuma версии
-install_kuma() {
+install_uptime_kuma() {
     log_info "Установка мониторинга с Uptime-Kuma..."
     
     # Создание docker-compose.yml
@@ -332,7 +316,7 @@ EOF
     log_info "Запуск контейнеров..."
     docker compose up -d
     
-    log_success "Uptime-Kuma мониторинг установлен!"
+    log_success "Мониторинг с Uptime-Kuma установлен!"
     echo ""
     log_info "Доступные сервисы:"
     echo "  - Uptime-Kuma: http://localhost:3001"
@@ -390,7 +374,7 @@ show_menu() {
     
     case $choice in
         1) install_grafana ;;
-        2) install_kuma ;;
+        2) install_uptime_kuma ;;
         3) install_node ;;
         4) log_info "Выход из скрипта"; exit 0 ;;
         *) log_error "Неверный выбор"; show_menu ;;
@@ -412,7 +396,7 @@ main() {
             install_grafana
             ;;
         --kuma)
-            install_kuma
+            install_uptime_kuma
             ;;
         --node)
             install_node
