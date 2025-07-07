@@ -9,7 +9,9 @@
 
 ## Запуск скрипта на VPS:
 
-```curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/main/install.sh | bash```
+```
+curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/main/install.sh | bash
+```
 
 ## Конфигурация Xray-Checker
 
