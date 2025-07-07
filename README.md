@@ -9,7 +9,20 @@
 
 ## Запуск скрипта на VPS:
 
-```curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/main/install.sh | bash```
+# Для Grafana
+```
+curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/main/install.sh | bash -s -- --grafana
+```
+
+# Для Uptime-Kuma
+```
+curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/main/install.sh | bash -s -- --kuma
+```
+
+# Для Node Exporter
+```
+curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/main/install.sh | bash -s -- --node
+```
 
 ## Конфигурация Xray-Checker
 
