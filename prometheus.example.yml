@@ -7,6 +7,6 @@ scrape_configs:
     static_configs:
       - targets: ['nodeexp-node:2112']
     scrape_interval: 1m
-  - job_name: Veesp
+  - job_name: Host-node
     static_configs:
       - targets: ['nodeexp-node:9100']
