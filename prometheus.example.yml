@@ -5,7 +5,7 @@ scrape_configs:
   - job_name: Xray Checker
     metrics_path: /metrics
     static_configs:
-      - targets: ['nodeexp-node:2112']
+      - targets: ['xray-checker:2112']
     scrape_interval: 1m
   - job_name: Host-node
     static_configs:

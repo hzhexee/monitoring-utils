@@ -1,3 +1,6 @@
+volumes:
+  uptime-kuma:
+
 services:
   xray-checker:
     container_name: xray-checker
@@ -20,3 +23,7 @@ services:
       - "127.0.0.1:3001:3001"
     volumes:
       - uptime-kuma:/app/data
+
+networks:
+  monitoring:
+    driver: bridge
