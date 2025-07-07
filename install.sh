@@ -208,7 +208,7 @@ ${additional_nodes}
 EOF
 
     # Замена подписки в docker-compose.yml
-    sed -i "s|PLACEHOLDER_SUBSCRIPTION|$subscription|g" docker-compose.yml
+    sed -i "s#PLACEHOLDER_SUBSCRIPTION#$subscription#g" docker-compose.yml
     
     # Обработка файловых подписок
     if [[ "$subscription" == file://* || "$subscription" == folder://* ]]; then
@@ -290,7 +290,7 @@ EOF
         subscription=$(get_subscription)
         
         # Замена подписки в docker-compose.yml
-        sed -i "s|PLACEHOLDER_SUBSCRIPTION|$subscription|g" docker-compose.yml
+        sed -i "s#PLACEHOLDER_SUBSCRIPTION#$subscription#g" docker-compose.yml
         
         # Обработка файловых подписок
         if [[ "$subscription" == file://* || "$subscription" == folder://* ]]; then
