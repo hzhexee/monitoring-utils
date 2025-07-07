@@ -184,6 +184,17 @@ networks:
     driver: bridge
 EOF
 
+    # Проверка нужна ли подписка
+    echo ""
+    read -p "Хотите добавить подписку для Xray-checker? (y/n): " need_subscription
+    
+    if [[ "$need_subscription" =~ ^[Yy]$ ]]; then
+        # Получение подписки
+        subscription=$(get_subscription)
+    else
+        subscription=""
+    fi
+    
     # Получение дополнительных нод
     additional_nodes=$(get_additional_nodes)
     
@@ -203,33 +214,30 @@ scrape_configs:
       - targets: ['nodeexp-node:9100']
 ${additional_nodes}EOF
 
-    # Получение подписки
-    subscription=$(get_subscription)
-    
-    # Замена подписки в docker-compose.yml
-    sed -i "s|PLACEHOLDER_SUBSCRIPTION|$subscription|g" docker-compose.yml
-    
-    # Обработка файловых подписок
-    if [[ "$subscription" == file://* || "$subscription" == folder://* ]]; then
-        local path=${subscription#*://}
-        if [[ ! -e "$path" ]]; then
-            log_error "Путь $path не существует"
-            exit 1
-        fi
+    # Замена подписки в docker-compose.yml только если она есть
+    if [[ -n "$subscription" ]]; then
+        sed -i "s|PLACEHOLDER_SUBSCRIPTION|$subscription|g" docker-compose.yml
         
-        # Добавление volume для файлов/папок
-        if [[ "$subscription" == file://* ]]; then
-            sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/config.json:ro" docker-compose.yml
-        else
-            sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/configs:ro" docker-compose.yml
+        # Обработка файловых подписок
+        if [[ "$subscription" == file://* || "$subscription" == folder://* ]]; then
+            local path=${subscription#*://}
+            if [[ ! -e "$path" ]]; then
+                log_error "Путь $path не существует"
+                exit 1
+            fi
+            
+            # Добавление volume для файлов/папок
+            if [[ "$subscription" == file://* ]]; then
+                sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/config.json:ro" docker-compose.yml
+            else
+                sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/configs:ro" docker-compose.yml
+            fi
         fi
-    fi
-    
-    # Получение информации о дополнительных нодах
-    additional_nodes=$(get_additional_nodes)
-    if [[ -n "$additional_nodes" ]]; then
-        # Добавление конфигурации дополнительных нод в prometheus.yml
-        sed -i "/scrape_configs:/a\\$additional_nodes" prometheus.yml
+    else
+        # Удаление xray-checker из docker-compose если подписка не нужна
+        sed -i '/xray-checker:/,/^$/d' docker-compose.yml
+        # Удаление xray-checker из prometheus.yml
+        sed -i '/Xray Checker/,/scrape_interval: 1m/d' prometheus.yml
     fi
     
     # Запуск контейнеров
@@ -242,7 +250,9 @@ ${additional_nodes}EOF
     echo "  - Grafana: http://localhost:3000 (admin/admin)"
     echo "  - Prometheus: http://localhost:9090"
     echo "  - Node Exporter: http://localhost:9100"
-    echo "  - Xray Checker: http://localhost:2112"
+    if [[ -n "$subscription" ]]; then
+        echo "  - Xray Checker: http://localhost:2112"
+    fi
     echo ""
     if [[ -n "$additional_nodes" ]]; then
         log_info "Дополнительные ноды настроены в Prometheus"
@@ -287,26 +297,35 @@ networks:
     driver: bridge
 EOF
 
-    # Получение подписки
-    subscription=$(get_subscription)
+    # Проверка нужна ли подписка
+    echo ""
+    read -p "Хотите добавить подписку для Xray-checker? (y/n): " need_subscription
     
-    # Замена подписки в docker-compose.yml
-    sed -i "s|PLACEHOLDER_SUBSCRIPTION|$subscription|g" docker-compose.yml
-    
-    # Обработка файловых подписок
-    if [[ "$subscription" == file://* || "$subscription" == folder://* ]]; then
-        local path=${subscription#*://}
-        if [[ ! -e "$path" ]]; then
-            log_error "Путь $path не существует"
-            exit 1
-        fi
+    if [[ "$need_subscription" =~ ^[Yy]$ ]]; then
+        # Получение подписки
+        subscription=$(get_subscription)
         
-        # Добавление volume для файлов/папок
-        if [[ "$subscription" == file://* ]]; then
-            sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/config.json:ro" docker-compose.yml
-        else
-            sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/configs:ro" docker-compose.yml
+        # Замена подписки в docker-compose.yml
+        sed -i "s|PLACEHOLDER_SUBSCRIPTION|$subscription|g" docker-compose.yml
+        
+        # Обработка файловых подписок
+        if [[ "$subscription" == file://* || "$subscription" == folder://* ]]; then
+            local path=${subscription#*://}
+            if [[ ! -e "$path" ]]; then
+                log_error "Путь $path не существует"
+                exit 1
+            fi
+            
+            # Добавление volume для файлов/папок
+            if [[ "$subscription" == file://* ]]; then
+                sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/config.json:ro" docker-compose.yml
+            else
+                sed -i "/xray-checker:/a\\    volumes:\n      - $path:/app/configs:ro" docker-compose.yml
+            fi
         fi
+    else
+        # Удаление xray-checker из docker-compose если подписка не нужна
+        sed -i '/xray-checker:/,/^$/d' docker-compose.yml
     fi
     
     # Запуск контейнеров
@@ -317,7 +336,9 @@ EOF
     echo ""
     log_info "Доступные сервисы:"
     echo "  - Uptime-Kuma: http://localhost:3001"
-    echo "  - Xray Checker: http://localhost:2112"
+    if [[ "$need_subscription" =~ ^[Yy]$ ]]; then
+        echo "  - Xray Checker: http://localhost:2112"
+    fi
 }
 
 # Установка Node Exporter на ноду
