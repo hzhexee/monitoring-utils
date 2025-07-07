@@ -1,0 +1,22 @@
+services:
+  xray-checker:
+    container_name: xray-checker
+    restart: unless-stopped
+    image: kutovoys/xray-checker
+    networks:
+      - monitoring
+    environment:
+      - SUBSCRIPTION_URL=
+    ports:
+      - "127.0.0.1:2112:2112"
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    networks:
+      - monitoring
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - uptime-kuma:/app/data

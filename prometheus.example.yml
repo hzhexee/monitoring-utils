@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: Xray Checker
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['nodeexp-node:2112']
+    scrape_interval: 1m
+  - job_name: Veesp
+    static_configs:
+      - targets: ['nodeexp-node:9100']
