@@ -9,14 +9,18 @@
 
 ## Запуск скрипта на VPS:
 
+Скачиваем репозиторий
 ```bash
-# Скачиваем репозиторий
 git clone https://github.com/hzhexee/monitoring-utils.git && cd monitoring-utils
+```
 
-# Запускаем установку
+Запускаем установку
+```bash
 chmod +x install.sh && ./install.sh
+```
 
-# Запускаем скрипт
+Запуск скрипта (либо через install.sh)
+```bash
 ./script.py --grafana    # Для развертывания Grafana стека
 ./script.py --kuma       # Для развертывания Uptime-Kuma стека  
 ./script.py --node       # Для развертывания Node Exporter на ноде
