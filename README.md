@@ -2,8 +2,8 @@
 
 Скрипт позволяет полу-автоматически развернуть на VPS две вариации мониторинга:
 
-- Xray-checker + Node Exporter + Prometheus + Grafana
-- Xray-checker + Uptime-Kuma
+- [Node Exporter + Prometheus + Grafana](examples/Grafana.md)
+- [Xray-checker + Uptime-Kuma](examples/UptimeKuma.md)
   - Host
   - Node
 
@@ -11,12 +11,10 @@
 
 ```bash
 # Скачиваем репозиторий
-git clone https://github.com/hzhexee/monitoring-utils.git
-cd monitoring-utils
+git clone https://github.com/hzhexee/monitoring-utils.git && cd monitoring-utils
 
 # Запускаем установку
-chmod +x install.sh
-./install.sh
+chmod +x install.sh && ./install.sh
 
 # Запускаем скрипт
 ./script.py --grafana    # Для развертывания Grafana стека
@@ -24,8 +22,6 @@ chmod +x install.sh
 ./script.py --node       # Для развертывания Node Exporter на ноде
 ./script.py              # Для интерактивного режима
 ```
-
-
 
 ## Конфигурация Xray-Checker
 
@@ -42,7 +38,16 @@ Xray-Checker принимает 4 формата подписок:
 > [!NOTE]
 > Все контейнеры слушают только localhost; доступ извне можно получить либо с помощью проброса портов, либо с помощью Reverse-Proxy.
 
-Доступны следующие флаги выполнения:
+Советую на время настройки в `.ssh/config` настроить автопроброс портов:
+```
+LocalForward 3001 localhost:3001
+LocalForward 2112 localhost:2112
+LocalForward 3000 localhost:3000
+LocalForward 9090 localhost:9090
+LocalForward 9100 localhost:9100
+```
+
+## Доступны следующие флаги выполнения:
 
 - `--grafana` - установка версии с Xray-checker + Node Exporter + Prometheus + Grafana
 - `--kuma` - установка версии с Xray-checker + Uptime-Kuma
@@ -50,6 +55,6 @@ Xray-Checker принимает 4 формата подписок:
 - Без указания флагов скрипт предложит выбор из трех вышеописанных опций 
 
 > [!WARNING]
-Для коректной работы Node Exporter на нодах необходимо открыть доступ с айпи мастер-ноды
+Для коректной работы Node Exporter на нодах необходимо открыть доступ с айпи мастер-ноды,
 i.e. `ufw allow from 1.2.3.4` 
 
