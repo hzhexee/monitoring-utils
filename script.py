@@ -98,16 +98,7 @@ def get_subscription():
         else:
             print("Неверный формат подписки. Попробуйте снова.")
 
-def ask_grafana_subscription():
-    """Спрашивает пользователя о подписке для Grafana"""
-    while True:
-        answer = input("\nХотите ли вы настроить подписку для Grafana? (y/n): ").strip().lower()
-        if answer in ['y', 'yes', 'да', 'д']:
-            return True
-        elif answer in ['n', 'no', 'нет', 'н']:
-            return False
-        else:
-            print("Пожалуйста, введите 'y' для да или 'n' для нет")
+
 
 def create_prometheus_config(nodes=[]):
     """Создает конфигурацию Prometheus"""
@@ -116,14 +107,6 @@ def create_prometheus_config(nodes=[]):
             'scrape_interval': '15s'
         },
         'scrape_configs': [
-            {
-                'job_name': 'Xray Checker',
-                'metrics_path': '/metrics',
-                'static_configs': [
-                    {'targets': ['xray-checker:2112']}
-                ],
-                'scrape_interval': '1m'
-            },
             {
                 'job_name': 'Host-node',
                 'static_configs': [
@@ -148,7 +131,7 @@ def create_prometheus_config(nodes=[]):
     
     print("Конфигурация Prometheus создана")
 
-def create_docker_compose_grafana(subscription, mount_paths=None):
+def create_docker_compose_grafana():
     """Создает docker-compose для Grafana стека"""
     compose_content = """volumes:
   prometheus_data:
@@ -200,31 +183,6 @@ services:
     depends_on:
       - prometheus
 
-  xray-checker:
-    image: kutovoys/xray-checker
-    networks:
-      - monitoring
-    container_name: xray-checker
-    environment:
-      - SUBSCRIPTION_URL={subscription}
-    ports:
-      - "127.0.0.1:2112:2112"
-""".format(subscription=subscription)
-
-    # Добавляем монтирование для файлов/папок
-    if mount_paths:
-        lines = compose_content.split('\n')
-        for i, line in enumerate(lines):
-            if 'container_name: xray-checker' in line:
-                # Вставляем volumes после container_name
-                volume_lines = ['    volumes:']
-                for mount_path in mount_paths:
-                    volume_lines.append(f'      - {mount_path}:{mount_path}:ro')
-                lines[i+1:i+1] = volume_lines
-                break
-        compose_content = '\n'.join(lines)
-
-    compose_content += """
 networks:
   monitoring:
     driver: bridge
@@ -332,16 +290,6 @@ def deploy_grafana():
     # Проверяем Docker
     check_docker()
     
-    # Получаем подписку
-    subscription = get_subscription()
-    
-    # Проверяем, нужна ли подписка для Grafana
-    if not ask_grafana_subscription():
-        subscription = ""
-    
-    # Получаем пути для монтирования
-    mount_paths = get_mount_paths(subscription)
-    
     # Спрашиваем про внешние ноды
     nodes = []
     add_nodes = input("\nХотите добавить внешние ноды для мониторинга? (y/n): ").strip().lower()
@@ -357,7 +305,7 @@ def deploy_grafana():
     
     # Создаем конфигурации
     create_prometheus_config(nodes)
-    create_docker_compose_grafana(subscription, mount_paths)
+    create_docker_compose_grafana()
     
     # Запускаем контейнеры
     print("\nЗапуск контейнеров...")
@@ -367,7 +315,6 @@ def deploy_grafana():
     print("Grafana: http://localhost:3000 (admin/admin)")
     print("Prometheus: http://localhost:9090")
     print("Node Exporter: http://localhost:9100")
-    print("Xray Checker: http://localhost:2112")
 
 def deploy_kuma():
     """Развертывает Uptime-Kuma стек"""
@@ -433,7 +380,7 @@ def main():
     else:
         # Интерактивный режим
         print("Выберите вариант развертывания:")
-        print("1. Grafana стек (Xray-checker + Node Exporter + Prometheus + Grafana)")
+        print("1. Grafana стек (Node Exporter + Prometheus + Grafana)")
         print("2. Uptime-Kuma стек (Xray-checker + Uptime-Kuma)")
         print("3. Node Exporter (только для ноды)")
         

@@ -11,7 +11,7 @@
 
 ```bash
 # Скачиваем репозиторий
-git clone <repository-url>
+git clone https://github.com/hzhexee/monitoring-utils.git
 cd monitoring-utils
 
 # Запускаем установку

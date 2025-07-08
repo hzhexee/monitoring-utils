@@ -12,11 +12,11 @@ sudo apt update && sudo apt upgrade -y
 
 # Устанавливаем необходимые пакеты
 echo "Установка необходимых пакетов..."
-sudo apt install -y python3 python3-pip python3-pyyaml curl wget git
-
-# Устанавливаем Python зависимости
-echo "Установка Python зависимостей..."
-pip3 install -r requirements.txt
+sudo apt install -y python3 python3-pip curl wget git
 
 # Делаем скрипт исполняемым
 chmod +x script.py
+
+# Запускаем скрипт
+echo "Запуск скрипта..."
+python3 script.py
