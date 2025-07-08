@@ -118,11 +118,11 @@ def create_prometheus_config(nodes=[]):
     
     # Добавляем внешние ноды
     if nodes:
-        for i, node in enumerate(nodes):
+        for node in nodes:
             config['scrape_configs'].append({
-                'job_name': f'External-node-{i+1}',
+                'job_name': node['name'],
                 'static_configs': [
-                    {'targets': [f'{node}:9100']}
+                    {'targets': [f"{node['ip']}:9100"]}
                 ]
             })
     
@@ -295,11 +295,14 @@ def deploy_grafana():
     add_nodes = input("\nХотите добавить внешние ноды для мониторинга? (y/n): ").strip().lower()
     if add_nodes in ['y', 'yes', 'да', 'д']:
         while True:
-            node = input("Введите IP адрес ноды (или 'done' для завершения): ").strip()
-            if node.lower() == 'done':
+            node_ip = input("Введите IP адрес ноды (или 'done' для завершения): ").strip()
+            if node_ip.lower() == 'done':
                 break
-            if re.match(r'^(\d{1,3}\.){3}\d{1,3}$', node):
-                nodes.append(node)
+            if re.match(r'^(\d{1,3}\.){3}\d{1,3}$', node_ip):
+                node_name = input(f"Введите имя для ноды {node_ip}: ").strip()
+                if not node_name:
+                    node_name = f"node-{node_ip.replace('.', '-')}"
+                nodes.append({'ip': node_ip, 'name': node_name})
             else:
                 print("Неверный IP адрес")
     
