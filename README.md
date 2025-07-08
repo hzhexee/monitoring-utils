@@ -1,6 +1,6 @@
 # Скрипт для авторазвертывания контейнеров с мониторинг-утилитами
 
-Скрипт позволяет полу-автоматически развернуть на VPS две вариации мониторинга:
+Скрипт позволяет полу-автоматически развернуть на VPS две вариации мониторинга (по ссылке - гайд по настройке):
 
 - [Node Exporter + Prometheus + Grafana](examples/Grafana.md)
 - [Xray-checker + Uptime-Kuma](examples/UptimeKuma.md)
@@ -44,11 +44,11 @@ Xray-Checker принимает 4 формата подписок:
 
 Советую на время настройки в `.ssh/config` настроить автопроброс портов:
 ```
-LocalForward 3001 localhost:3001
-LocalForward 2112 localhost:2112
-LocalForward 3000 localhost:3000
-LocalForward 9090 localhost:9090
-LocalForward 9100 localhost:9100
+LocalForward 3001 localhost:3001  # Uptime-Kuma
+LocalForward 2112 localhost:2112  # Xray-Checker
+LocalForward 3000 localhost:3000  # Grafana
+LocalForward 9090 localhost:9090  # Prometheus
+LocalForward 9100 localhost:9100  # Node Exporter
 ```
 
 ## Доступны следующие флаги выполнения:
