@@ -3,9 +3,9 @@
 Скрипт позволяет полу-автоматически развернуть на VPS две вариации мониторинга (по ссылке - гайд по настройке):
 
 - [Node Exporter + Prometheus + Grafana](examples/Grafana.md)
-- [Xray-checker + Uptime-Kuma](examples/UptimeKuma.md)
   - Host
   - Node
+- [Xray-checker + Uptime-Kuma](examples/UptimeKuma.md)
 
 ## Запуск скрипта на VPS:
 
