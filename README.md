@@ -43,7 +43,7 @@ Xray-Checker принимает 4 формата подписок:
 > Все контейнеры слушают только localhost; доступ извне можно получить либо с помощью проброса портов, либо с помощью Reverse-Proxy.
 
 Советую на время настройки в `.ssh/config` настроить автопроброс портов:
-```
+```bash
 LocalForward 3001 localhost:3001  # Uptime-Kuma
 LocalForward 2112 localhost:2112  # Xray-Checker
 LocalForward 3000 localhost:3000  # Grafana
