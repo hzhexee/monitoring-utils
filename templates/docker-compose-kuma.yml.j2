@@ -1,0 +1,36 @@
+volumes:
+  uptime-kuma:
+
+services:
+  xray-checker:
+    container_name: xray-checker
+    restart: unless-stopped
+    image: kutovoys/xray-checker
+    networks:
+      - monitoring
+    environment:
+      - SUBSCRIPTION_URL={{ subscription_url }}
+    ports:
+      - "127.0.0.1:2112:2112"
+{% if subscription_url.startswith('file:///') %}
+    volumes:
+      - {{ subscription_url[7:] }}:{{ subscription_url[7:] }}:ro
+{% elif subscription_url.startswith('folder:///') %}
+    volumes:
+      - {{ subscription_url[9:] }}:{{ subscription_url[9:] }}:ro
+{% endif %}
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    networks:
+      - monitoring
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - uptime-kuma:/app/data
+
+networks:
+  monitoring:
+    driver: bridge

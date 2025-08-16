@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: Host-node
+    static_configs:
+      - targets: ['nodeexp-node:9100']
+      
+{% if external_nodes | length > 0 %}
+{% for node in external_nodes %}
+  - job_name: {{ node.name }}
+    static_configs:
+      - targets: ['{{ node.ip }}:9100']
+{% endfor %}
+{% endif %}

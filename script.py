@@ -18,6 +18,21 @@ import urllib.parse
 import base64
 from pathlib import Path
 
+def system_update():
+    """Обновляет систему"""
+    print("Обновление системы...")
+    run_command("apt update && apt upgrade -y")
+    
+def create_basedir():
+    """Создает базовую директорию для проекта"""
+    base_dir = Path("/opt/monitoring-utils")
+    if not base_dir.exists():
+        print(f"Создание директории: {base_dir}")
+        base_dir.mkdir()
+        run_command("cd /opt/monitoring-utils", check=False)
+    else:
+        print(f"Директория уже существует: {base_dir}")
+
 def run_command(command, check=True):
     """Выполняет команду в shell"""
     print(f"Выполняю: {command}")

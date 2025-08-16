@@ -1,0 +1,136 @@
+---
+- name: Deploy Monitoring Tools
+  hosts: "{{ target_hosts | default('all') }}"
+  become: yes
+  vars:
+    deployment_type: "{{ deployment_type | default('grafana') }}" # grafana, kuma, node
+    subscription_url: "{{ subscription_url | default('') }}"
+    master_node_ip: "{{ master_node_ip | default('') }}"
+    external_nodes: "{{ external_nodes | default([]) }}"
+    working_dir: "/opt/monitoring"
+    
+  tasks:
+    - name: Create working directory
+      file:
+        path: "{{ working_dir }}"
+        state: directory
+        mode: '0755'
+    
+    - name: Update and upgrade system
+      apt:
+        update_cache: yes
+        upgrade: yes
+        
+    - name: Check if Docker is installed
+      command: docker --version
+      register: docker_check
+      ignore_errors: yes
+      changed_when: false
+      
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+      when: docker_check.rc != 0
+        
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      when: docker_check.rc != 0
+      
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+        state: present
+      when: docker_check.rc != 0
+        
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+      when: docker_check.rc != 0
+        
+    - name: Add user to Docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      when: docker_check.rc != 0
+        
+    - name: Install Python Docker dependencies
+      apt:
+        name:
+          - python3-pip
+        state: present
+        
+    - name: Install Docker Python module
+      pip:
+        name:
+          - docker
+          - docker-compose
+        state: present
+        
+    # Grafana deployment
+    - name: Create Prometheus config
+      template:
+        src: templates/prometheus.yml.j2
+        dest: "{{ working_dir }}/prometheus.yml"
+      when: deployment_type == 'grafana'
+      
+    - name: Create Docker Compose for Grafana
+      template:
+        src: templates/docker-compose-grafana.yml.j2
+        dest: "{{ working_dir }}/docker-compose.yml"
+      when: deployment_type == 'grafana'
+        
+    # Uptime-Kuma deployment
+    - name: Create Docker Compose for Uptime-Kuma
+      template:
+        src: templates/docker-compose-kuma.yml.j2
+        dest: "{{ working_dir }}/docker-compose.yml"
+      when: deployment_type == 'kuma'
+      
+    # Node Exporter deployment
+    - name: Create Docker Compose for Node Exporter
+      template:
+        src: templates/docker-compose-node.yml.j2
+        dest: "{{ working_dir }}/docker-compose.yml"
+      when: deployment_type == 'node'
+        
+    - name: Allow master node access through UFW
+      ufw:
+        rule: allow
+        from_ip: "{{ master_node_ip }}"
+      when: deployment_type == 'node' and master_node_ip != ''
+      
+    # Start containers
+    - name: Deploy with Docker Compose
+      community.docker.docker_compose:
+        project_src: "{{ working_dir }}"
+        state: present
+      register: output
+
+    - name: Show deployed services information
+      debug:
+        msg: |
+          Deployment completed successfully.
+          {% if deployment_type == 'grafana' %}
+          Grafana: http://localhost:3000 (admin/admin)
+          Prometheus: http://localhost:9090
+          Node Exporter: http://localhost:9100
+          {% elif deployment_type == 'kuma' %}
+          Uptime-Kuma: http://localhost:3001
+          Xray Checker: http://localhost:2112
+          {% else %}
+          Node Exporter: http://localhost:9100
+          {% endif %}
