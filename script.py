@@ -29,7 +29,7 @@ def create_basedir():
     if not base_dir.exists():
         print(f"Создание директории: {base_dir}")
         base_dir.mkdir()
-        run_command("cd /opt/monitoring-utils", check=False)
+        os.chdir(str(base_dir))
     else:
         print(f"Директория уже существует: {base_dir}")
 
