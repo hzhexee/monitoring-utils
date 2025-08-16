@@ -2,35 +2,31 @@ all:
   vars:
     ansible_port: 22  # Порт SSH по умолчанию для всех хостов
     ansible_user: root  # Пользователь SSH по умолчанию
-    ansible_ssh_private_key_file: "C:\\Users\\User\\.ssh\\id_ed25519"  # Ключ по умолчанию
-  
+    ansible_ssh_private_key_file: "/root/.ssh/id_ed25519"  # Ключ по умолчанию
+
   children:
     grafana_hosts:
       hosts:
         monitoring_server:
-          ansible_host: 192.168.1.10
+          ansible_host: 192.168.1.100
       vars: 
         deployment_type: grafana
         external_nodes:
           - name: worker1
-            ip: 192.168.1.11
-          - name: worker2
-            ip: 192.168.1.12
+            ip: 192.168.1.101
 
     node_hosts:
       hosts:
         worker1:
-          ansible_host: 192.168.1.11
-        worker2:
-          ansible_host: 192.168.1.12
+          ansible_host: 192.168.1.101
       vars:
         deployment_type: node
-        master_node_ip: 192.168.1.10
-            
+        master_node_ip: 192.168.1.100
+
     kuma_hosts:
       hosts:
         kuma_server:
-          ansible_host: 192.168.1.20
+          ansible_host: 192.168.1.102
       vars:
         deployment_type: kuma
-        subscription_url: "https://sub.example.com/longassuuid"
+        subscription_url: "https://subs.domain.com/uuid"
