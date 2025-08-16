@@ -32,6 +32,7 @@ def create_basedir():
         os.chdir(str(base_dir))
     else:
         print(f"Директория уже существует: {base_dir}")
+    os.chdir(str(base_dir))
 
 def run_command(command, check=True):
     """Выполняет команду в shell"""
