@@ -142,7 +142,7 @@
       
     # Start containers
     - name: Deploy with Docker Compose
-      community.docker.docker_compose:
+      community.docker.docker_compose_v2:
         project_src: "{{ working_dir }}"
         state: present
       register: output
