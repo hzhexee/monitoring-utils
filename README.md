@@ -11,20 +11,7 @@
 
 Скачиваем репозиторий
 ```bash
-git clone https://github.com/hzhexee/monitoring-utils.git && cd monitoring-utils
-```
-
-Запускаем установку
-```bash
-chmod +x install.sh && ./install.sh
-```
-
-Запуск скрипта (либо через install.sh)
-```bash
-./script.py --grafana    # Для развертывания Grafana стека
-./script.py --kuma       # Для развертывания Uptime-Kuma стека  
-./script.py --node       # Для развертывания Node Exporter на ноде
-./script.py              # Для интерактивного режима
+python3 <(curl -sL https://raw.githubusercontent.com/hzhexee/monitoring-utils/refs/heads/main/script.py)
 ```
 
 ## Конфигурация Xray-Checker
