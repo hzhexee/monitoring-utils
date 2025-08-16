@@ -305,6 +305,8 @@ def deploy_grafana():
     # Проверяем Docker
     check_docker()
     
+    create_basedir()
+    
     # Спрашиваем про внешние ноды
     nodes = []
     add_nodes = input("\nХотите добавить внешние ноды для мониторинга? (y/n): ").strip().lower()
@@ -341,6 +343,8 @@ def deploy_kuma():
     # Проверяем Docker
     check_docker()
     
+    create_basedir()
+    
     # Получаем подписку
     subscription = get_subscription()
     
@@ -364,7 +368,9 @@ def deploy_node():
     
     # Проверяем Docker
     check_docker()
-    
+
+    create_basedir()
+
     # Создаем конфигурации
     create_node_compose()
     
