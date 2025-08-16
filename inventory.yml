@@ -23,10 +23,10 @@ all:
         deployment_type: node
         master_node_ip: 192.168.1.100
 
-    kuma_hosts:
-      hosts:
-        kuma_server:
-          ansible_host: 192.168.1.102
-      vars:
-        deployment_type: kuma
-        subscription_url: "https://subs.domain.com/uuid"
+    # kuma_hosts:
+    #   hosts:
+    #     kuma_server:
+    #       ansible_host: 192.168.1.102
+    #   vars:
+    #     deployment_type: kuma
+    #     subscription_url: "https://subs.domain.com/uuid"

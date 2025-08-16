@@ -3,10 +3,6 @@
   hosts: "{{ target_hosts | default('all') }}"
   become: yes
   vars:
-    deployment_type: "{{ deployment_type | default('grafana') }}" # grafana, kuma, node
-    subscription_url: "{{ subscription_url | default('') }}"
-    master_node_ip: "{{ master_node_ip | default('') }}"
-    external_nodes: "{{ external_nodes | default([]) }}"
     working_dir: "/opt/monitoring"
     
   tasks:
@@ -16,38 +12,6 @@
         state: directory
         mode: '0755'
     
-    # Add check for apt locks
-    - name: Check apt locks
-      shell: lsof /var/lib/apt/lists/lock /var/lib/dpkg/lock* 2>/dev/null || echo "No locks"
-      register: apt_locks
-      changed_when: false
-      
-    - name: Wait for apt locks to be released if needed
-      pause:
-        seconds: 10
-      when: apt_locks.stdout != "No locks"
-      register: wait_result
-      
-    - name: Retry checking apt locks if waiting
-      shell: lsof /var/lib/apt/lists/lock /var/lib/dpkg/lock* 2>/dev/null || echo "No locks"
-      register: apt_locks_retry
-      changed_when: false
-      when: wait_result.skipped is not defined
-      
-    - name: Fail if locks still persist
-      fail:
-        msg: "APT is still locked after waiting. Please check manually."
-      when: wait_result.skipped is not defined and apt_locks_retry.stdout != "No locks"
-    
-    - name: Update and upgrade system
-      apt:
-        update_cache: yes
-        upgrade: yes
-      register: apt_update
-      retries: 5
-      delay: 20
-      until: apt_update is success
-        
     - name: Check if Docker is installed
       command: docker --version
       register: docker_check
@@ -101,10 +65,9 @@
         state: present
         
     - name: Install Docker Python module
-      pip:
+      apt:
         name:
-          - docker
-          - docker-compose
+          - python3-docker
         state: present
         
     # Grafana deployment
@@ -138,7 +101,7 @@
       ufw:
         rule: allow
         from_ip: "{{ master_node_ip }}"
-      when: deployment_type == 'node' and master_node_ip != ''
+      when: deployment_type == 'node' and master_node_ip is defined and master_node_ip != ''
       
     # Start containers
     - name: Deploy with Docker Compose
