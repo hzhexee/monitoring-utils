@@ -32,6 +32,23 @@ def create_basedir():
         os.chdir(str(base_dir))
     else:
         print(f"Директория уже существует: {base_dir}")
+        choice = input("Выберите действие:\n1. Использовать существующую директорию\n2. Создать новую директорию\n3. Перезаписать существующую директорию\nВыбор (1-3): ").strip()
+        
+        if choice == '1':
+            print(f"Использую существующую директорию: {base_dir}")
+        elif choice == '2':
+            timestamp = subprocess.check_output('date +%Y%m%d_%H%M%S', shell=True).decode().strip()
+            new_dir = Path(f"/opt/monitoring-utils_{timestamp}")
+            print(f"Создание новой директории: {new_dir}")
+            new_dir.mkdir()
+            base_dir = new_dir
+        elif choice == '3':
+            print(f"Перезапись директории: {base_dir}")
+            run_command(f"rm -rf {base_dir}")
+            base_dir.mkdir()
+        else:
+            print("Неверный выбор. Использую существующую директорию.")
+    
     os.chdir(str(base_dir))
 
 def run_command(command, check=True):
